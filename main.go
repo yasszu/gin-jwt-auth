@@ -42,7 +42,7 @@ func main() {
 
 	// /v1/..
 	v1 := r.Group("/v1")
-	v1.Use(jwt.AuthMiddleware(jwt.NewAuthConfig(cnf.JWT.Secret)))
+	v1.Use(jwt.AuthMiddleware(jwt.HeaderAuthConfig()))
 	accountHandler.RegisterV1(v1)
 
 	// Start server

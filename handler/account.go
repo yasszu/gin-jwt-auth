@@ -14,8 +14,7 @@ import (
 type IAccountHandler interface {
 	Signup(c *gin.Context)
 	Login(c *gin.Context)
-	Logout(c *gin.Context)
-	Verify(c *gin.Context)
+	Me(c *gin.Context)
 }
 
 type AccountHandler struct {
@@ -30,7 +29,6 @@ func NewAccountHandler(repository repository.IAccountRepository, conf *conf.Conf
 func (h AccountHandler) RegisterRoot(e *gin.Engine) {
 	e.POST("/signup", h.Signup)
 	e.POST("/login", h.Login)
-	e.POST("/logout", h.Logout)
 }
 
 func (h AccountHandler) RegisterV1(v1 *gin.RouterGroup) {
@@ -55,7 +53,7 @@ func (h *AccountHandler) Signup(c *gin.Context) {
 		return
 	}
 
-	token, err := h.signJWT(&account, c)
+	token, err := jwt.Sign(&account)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -82,19 +80,13 @@ func (h *AccountHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.signJWT(account, c)
+	token, err := jwt.Sign(account)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
-}
-
-// Logout POST /logout
-func (h *AccountHandler) Logout(c *gin.Context) {
-	util.DeleteAuthorizationCookie(c)
-	c.String(http.StatusOK, "Logout success")
 }
 
 // Me  GET /v1/me
@@ -106,13 +98,4 @@ func (h *AccountHandler) Me(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, model.NewAccountResponse(account))
-}
-
-func (h AccountHandler) signJWT(account *model.Account, c *gin.Context) (*string, error) {
-	token, err := jwt.Sign(account.Email, account.ID, h.conf.JWT.Secret)
-	if err != nil {
-		return nil, err
-	}
-	util.SaveAuthorizationCookie(token, c)
-	return &token, nil
 }
