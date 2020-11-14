@@ -96,12 +96,6 @@ var (
 	}
 )
 
-func HeaderAuthConfig() AuthConfig {
-	config := DefaultAuthConfig
-	config.SigningKey = getSigningKey()
-	return config
-}
-
 func AuthMiddleware(config AuthConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set(config.ContextKey, 0)
@@ -120,4 +114,14 @@ func AuthMiddleware(config AuthConfig) gin.HandlerFunc {
 			c.Set(config.ContextKey, token)
 		}
 	}
+}
+
+func HeaderAuthConfig() AuthConfig {
+	config := DefaultAuthConfig
+	config.SigningKey = getSigningKey()
+	return config
+}
+
+func HeadAuthHandler() gin.HandlerFunc {
+	return AuthMiddleware(HeaderAuthConfig())
 }
