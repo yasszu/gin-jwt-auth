@@ -11,18 +11,12 @@ import (
 	"gin-jwt-auth/util"
 )
 
-type IAccountHandler interface {
-	Signup(c *gin.Context)
-	Login(c *gin.Context)
-	Me(c *gin.Context)
-}
-
 type AccountHandler struct {
-	accountRepository repository.IAccountRepository
+	accountRepository repository.AccountRepository
 	conf              *conf.Conf
 }
 
-func NewAccountHandler(repository repository.IAccountRepository, conf *conf.Conf) *AccountHandler {
+func NewAccountHandler(repository repository.AccountRepository, conf *conf.Conf) *AccountHandler {
 	return &AccountHandler{accountRepository: repository, conf: conf}
 }
 
